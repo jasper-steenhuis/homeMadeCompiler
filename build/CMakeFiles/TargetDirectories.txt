@@ -1,0 +1,3 @@
+/home/jasper/Documents/jasperCompiler/build/CMakeFiles/japser.dir
+/home/jasper/Documents/jasperCompiler/build/CMakeFiles/edit_cache.dir
+/home/jasper/Documents/jasperCompiler/build/CMakeFiles/rebuild_cache.dir
