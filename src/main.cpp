@@ -47,14 +47,16 @@ std::vector<Token> tokenize(const std::string& str){
             i--;
             tokens.push_back({.type = TokenType::int_lit, .value = stringBuffer});
             stringBuffer.clear();
+            continue;
         }
         
-        else if(std::isspace(str[i])){
+        else if(std::isspace(c)){
             continue;
         }
         else if (c == ';'){
             tokens.push_back({.type = TokenType::semi});
             stringBuffer.clear();
+            continue;
         }
         
         else {
@@ -69,17 +71,28 @@ std::vector<Token> tokenize(const std::string& str){
 
 std::string tokenToAsm(const std::vector<Token>& tokens){
     std::stringstream output;
-    output << "global_start\n_start:\n";
+    std::stringstream temp;
+    output << "global _start\n_start:\n";
     for(size_t i=0; i<tokens.size(); i++){
         const Token& token = tokens.at(i);
-        if(token.type == TokenType::_return){
-            
+        if(token.type == TokenType::int_lit){
+            temp << token.value.value();
+        }
+        if(token.type == TokenType::semi){
+            output << "     mov rax, 60\n";
+            output << "     mov rdi, " <<  temp.str() << "\n";
+            output << "     syscall";
         }
     }
+    return output.str();
 }
 
 int main(int argc, char const *argv[])
 {
+    if(argc !=2){
+        std::cerr << "incorrect usage" << std::endl;
+        return EXIT_FAILURE;
+    }
     std::string contents; 
     {
         std::stringstream ss;
@@ -88,7 +101,13 @@ int main(int argc, char const *argv[])
         contents = ss.str();    
     }
     std::vector<Token> tokens = tokenize(contents);
-    
+    {
+        std::fstream file("out.asm",std::ios::out);
+        file << tokenToAsm(tokens);
+        
+    }
+    system("nasm -felf64 out.asm");
+    system("ld -o out out.o");
     
     return EXIT_SUCCESS;
 }
